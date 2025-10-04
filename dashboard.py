@@ -51,6 +51,10 @@ else:
         port = BASE_PORT + idx
         app_path = ROOT / name / "app.py"
 
+        st.write(f"Checking path: {app_path}")
+        st.write(f"Exists? {app_path.exists()}")
+
+
         if not app_path.exists():
             continue
 
@@ -60,26 +64,31 @@ else:
                 proc = st.session_state.processes.get(name)
                 if proc is None or proc.poll() is not None:
                     cmd = [
-                        python_cmd,
-                        "-m",
-                        "streamlit",
-                        "run",
-                        str(app_path),
-                        "--server.port",
-                        str(port),
-                        "--server.headless",
-                        "true",
-                        "--server.address",
-                        "localhost",
-                    ]
+                    python_cmd,
+                    "-m",
+                    "streamlit",
+                    "run",
+                    str(app_path.resolve()),
+                    "--server.port",
+                    str(port),
+                    "--server.headless",
+                    "true",
+                    "--server.address",
+                    "localhost",
+                ]
+
+                    st.code(" ".join(cmd), language="bash")
+
+
                     env = os.environ.copy()
                     env.setdefault("PYTHONUNBUFFERED", "1")
                     st.session_state.processes[name] = subprocess.Popen(
                         cmd,
                         cwd=str(app_path.parent),
                         env=env,
-                        stdout=subprocess.DEVNULL,
-                        stderr=subprocess.DEVNULL,
+                        stdout=None,
+                        stderr=None,
+
                     )
                     st.info(f"Starting {name} on port {port}…")
         with col2:
